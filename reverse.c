@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   char const* const output= argv[2];
 
   FILE* inp_read = fopen(input, "r");
-  FILE* out_write= fopen(output,"r");
+  FILE* out_write= fopen(output,"w");
 
   char* buffer;
   size_t bufsize = 134;
@@ -49,25 +49,43 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  int count = 0;
+  int character = getline(&buffer, &bufsize, inp_read);
+  curr->line = malloc(bufsize * sizeof(char));
+  strcpy(curr->line, buffer);
 
-  while(getline(&buffer, &bufsize, inp_read) && count < 4){
-
-    curr->line = malloc(bufsize * sizeof(char));
-    strcpy(curr->line, buffer);
-
-    fwrite(curr->line, 1, 20, stdout);    
+  while((character = getline(&buffer, &bufsize, inp_read)) != -1){
 
     curr->next = (node_t*) malloc(sizeof(node_t));
     curr = curr->next;
 
-    fwrite(head->line, 1, 20, stdout);
-
-    count += 1;
+    curr->line = malloc(bufsize * sizeof(char));
+    strcpy(curr->line, buffer);
   }
-
+  
   curr->next = NULL;
   
+  node_t* prev = NULL;
+  node_t* current = head;
+  node_t* next = NULL;
+  
+  while(current != NULL){
+    
+    next = current->next;
+
+    current->next = prev;
+
+    prev = current;
+    current = next;
+  }
+
+  head = prev;
+ 
+  while(head != NULL){
+
+    fwrite(head->line, 1, 20, out_write);
+    head = head->next;
+  }
+
   return (0);
   
 }
